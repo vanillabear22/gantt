@@ -32,8 +32,8 @@ export default class Bar {
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.task.progress / 100) || 0;
+            this.duration *
+            (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
             'data-id': this.task.id,
@@ -124,27 +124,27 @@ export default class Bar {
         if (this.invalid) return;
 
         const bar = this.$bar;
-        const handle_width = 8;
+        const handle_width = 3;
 
         createSVG('rect', {
-            x: bar.getX() + bar.getWidth() - 9,
-            y: bar.getY() + 1,
-            width: handle_width,
-            height: this.height - 2,
-            rx: this.corner_radius,
-            ry: this.corner_radius,
-            class: 'handle right',
-            append_to: this.handle_group,
-        });
-
-        createSVG('rect', {
-            x: bar.getX() + 1,
+            x: bar.getX() - 1,
             y: bar.getY() + 1,
             width: handle_width,
             height: this.height - 2,
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'handle left',
+            append_to: this.handle_group,
+        });
+
+        createSVG('rect', {
+            x: bar.getX() + bar.getWidth() - 3,
+            y: bar.getY() + 1,
+            width: handle_width,
+            height: this.height - 2,
+            rx: this.corner_radius,
+            ry: this.corner_radius,
+            class: 'handle right',
             append_to: this.handle_group,
         });
 
@@ -236,7 +236,12 @@ export default class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width && width >= this.gantt.options.column_width) {
+        const divider = {
+            Month: 30,
+            Week: 7,
+            Day: 1,
+        };
+        if (width && width >= this.gantt.options.column_width / divider[this.gantt.options.view_mode]) { // минимальный шаг всегда один день
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
@@ -392,10 +397,10 @@ export default class Bar {
         const bar = this.$bar;
         this.handle_group
             .querySelector('.handle.left')
-            .setAttribute('x', bar.getX() + 1);
+            .setAttribute('x', bar.getX() - 1);
         this.handle_group
             .querySelector('.handle.right')
-            .setAttribute('x', bar.getEndX() - 9);
+            .setAttribute('x', bar.getEndX() - 3);
         const handle = this.group.querySelector('.handle.progress');
         handle &&
             handle.setAttribute('points', this.get_progress_polygon_points());
