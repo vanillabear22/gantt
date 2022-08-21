@@ -12,29 +12,32 @@ export default class Arrow {
 
     calculate_path() {
         let start_x =
-            this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
+            this.from_task.$bar.getX() + this.from_task.$bar.getWidth(); // from start to end  // from start to start
+        //    this.from_task.$bar.getX();  // from end to end
 
         const condition = () =>
             this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
             start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
 
-        while (condition()) {
-            start_x -= 10;
-        }
+        // while (condition()) {
+        //     start_x -= 10;
+        // }
 
         const start_y =
             this.gantt.options.header_height +
             this.gantt.options.bar_height +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
-            this.gantt.options.padding;
+            this.from_task.task._index +
+            this.gantt.options.padding
+            - this.from_task.$bar.getHeight() / 2;
 
-        const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        //const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2; // to END
+        const end_x = this.to_task.$bar.getX() + this.to_task.$bar.getWidth(); // to START
         const end_y =
             this.gantt.options.header_height +
             this.gantt.options.bar_height / 2 +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
+            this.to_task.task._index +
             this.gantt.options.padding;
 
         const from_is_below_to =
@@ -46,40 +49,116 @@ export default class Arrow {
             ? end_y + this.gantt.options.arrow_curve
             : end_y - this.gantt.options.arrow_curve;
 
+        // FROM START TO END // // FROM END TO END
+
+        // from start to end    
+        // this.path = `
+        // M ${start_x} ${start_y}
+        // a ${curve} ${curve} 0 0 1 ${curve} ${curve}
+        // V ${offset}
+        // a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+        // L ${end_x} ${end_y}
+        // m -5 -5
+        // l 5 5
+        // l -5 5`;
+
+        //from end to end
+        // this.path = `
+        //     M ${start_x} ${start_y}
+        //     a ${curve} ${curve} 0 0 0 -${curve}  ${curve}
+        //     V ${offset}
+        //     a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+        //     L ${end_x} ${end_y}
+        //     m -5 -5
+        //     l 5 5
+        //     l -5 5`;
+
+        // if (
+        //     this.to_task.$bar.getX() <
+        //     //this.from_task.$bar.getX() + this.gantt.options.padding + 20 //from start to end
+        //     this.from_task.$bar.getX() + this.gantt.options.padding //from end to end
+        // ) {
+        //     const down_1 = this.gantt.options.padding - curve;
+        //     const down_2 =
+        //         this.to_task.$bar.getY() +
+        //         this.to_task.$bar.getHeight() / 2 -
+        //         curve_y;
+        //     const left = this.to_task.$bar.getX() - this.gantt.options.padding;
+
+        // from start to end
+        // this.path = `
+        // M ${start_x} ${start_y}
+        // a ${curve} ${curve} 0 0 1 ${curve} ${curve}
+        // v ${down_1}
+        // a ${curve} ${curve} 0 0 1 -${curve} ${curve}
+        // H ${left}
+        // a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+        // V ${down_2}
+        // a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+        // L ${end_x} ${end_y}
+        // m -5 -5
+        // l 5 5
+        // l -5 5`;
+
+        // from end to end 
+        // this.path = `
+        //     M ${start_x} ${start_y}
+        //     a ${curve} ${curve} 0 0 0 -${curve}  ${curve}
+        //     v ${down_1}
+        //     a ${curve} ${curve} 0 0 1 -${curve} ${curve}
+        //     H ${left}
+        //     a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+        //     V ${down_2}
+        //     a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+        //     L ${end_x} ${end_y}
+        //     m -5 -5
+        //     l 5 5
+        //     l -5 5`;
+
+
+        // }
+
+        // FROM START TO START
+
+        const down_1 = this.gantt.options.padding - curve;
+        const down_2 =
+            this.to_task.$bar.getY() +
+            this.to_task.$bar.getHeight() / 2 -
+            curve_y;
+        let right = this.to_task.$bar.getX() + this.to_task.$bar.getWidth() + this.gantt.options.padding / 2;
+
         this.path = `
-            M ${start_x} ${start_y}
-            V ${offset}
-            a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-            L ${end_x} ${end_y}
-            m -5 -5
-            l 5 5
-            l -5 5`;
+                    M ${start_x} ${start_y}
+                    a ${curve} ${curve} 0 0 1 ${curve} ${curve}
+                    v ${down_1}
+                    a ${curve} ${curve} 0 0 1 -${curve} ${curve}
+                    H ${right}
+                    a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+                    V ${down_2}
+                    a ${curve} ${curve} 0 0 1 -${curve} ${curve_y}
+                    L ${end_x} ${end_y}
+                    // m -5 -5
+                    // l -5 5
+                    // l 5 5`;
 
         if (
-            this.to_task.$bar.getX() <
-            this.from_task.$bar.getX() + this.gantt.options.padding
+            this.to_task.$bar.getX() + this.to_task.$bar.getWidth() >
+            this.from_task.$bar.getX() + this.from_task.$bar.getWidth()
         ) {
-            const down_1 = this.gantt.options.padding / 2 - curve;
-            const down_2 =
-                this.to_task.$bar.getY() +
-                this.to_task.$bar.getHeight() / 2 -
-                curve_y;
-            const left = this.to_task.$bar.getX() - this.gantt.options.padding;
-
             this.path = `
-                M ${start_x} ${start_y}
-                v ${down_1}
-                a ${curve} ${curve} 0 0 1 -${curve} ${curve}
-                H ${left}
-                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
+                    M ${start_x} ${start_y}
+                    a ${curve} ${curve} 0 0 1 ${curve} ${curve}
+                    v ${down_1}
+                    a ${curve} ${curve} 0 0 0 ${curve} ${curve}
+                    H ${right - 10}
+                    a ${curve} ${curve} 0 0 1 ${curve} ${curve_y}
+                    V ${down_2}
+                    a ${curve} ${curve} 0 0 1 -${curve} ${curve_y}
+                    L ${end_x} ${end_y}
+                    // m -5 -5
+                    // l -5 5
+                    // l 5 5`;
         }
-    }
 
     draw() {
         this.element = createSVG('path', {

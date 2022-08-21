@@ -110,7 +110,7 @@ export default class Bar {
 
     draw_label() {
         createSVG('text', {
-            x: this.x + this.width / 2,
+            x: this.x + this.width / 2 + 10,
             y: this.y + this.height / 2,
             innerHTML: this.task.name,
             class: 'bar-label',
