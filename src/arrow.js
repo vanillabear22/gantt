@@ -1,23 +1,25 @@
 import { createSVG } from './svg_utils';
 
 export default class Arrow {
-    constructor(gantt, from_task, to_task) {
+    constructor(gantt, from_task, to_task, relationship_type) {
         this.gantt = gantt;
         this.from_task = from_task;
         this.to_task = to_task;
+        this.relationship_type = relationship_type;
 
         this.calculate_path();
         this.draw();
     }
 
     calculate_path() {
-        let start_x =
-            this.from_task.$bar.getX() + this.from_task.$bar.getWidth(); // from start to end  // from start to start
-        //    this.from_task.$bar.getX();  // from end to end
+        let start_x = this.from_task.$bar.getX() + this.from_task.$bar.getWidth(); // from F to S  // from F to F
+        if (this.relationship_type === 'SS') {
+            start_x = this.from_task.$bar.getX();
+        }
 
-        const condition = () =>
-            this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-            start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
+        // const condition = () =>
+        //     this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
+        //     start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
 
         // while (condition()) {
         //     start_x -= 10;
@@ -31,8 +33,11 @@ export default class Arrow {
             this.gantt.options.padding
             - this.from_task.$bar.getHeight() / 2;
 
-        //const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2; // to END
-        const end_x = this.to_task.$bar.getX() + this.to_task.$bar.getWidth(); // to START
+        let end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
+        if (this.relationship_type === 'FF') {
+            end_x = this.to_task.$bar.getX() + this.to_task.$bar.getWidth();
+        }
+
         const end_y =
             this.gantt.options.header_height +
             this.gantt.options.bar_height / 2 +
@@ -48,30 +53,30 @@ export default class Arrow {
         const offset = from_is_below_to
             ? end_y + this.gantt.options.arrow_curve
             : end_y - this.gantt.options.arrow_curve;
-
-        // FROM START TO END // // FROM END TO END
-
-        // from start to end    
+        console.log(this.relationship_type);
+        // FROM F TO S // // FROM S TO S
+            
+        // from F to S
         // this.path = `
         // M ${start_x} ${start_y}
         // a ${curve} ${curve} 0 0 1 ${curve} ${curve}
         // V ${offset}
         // a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
         // L ${end_x} ${end_y}
-        // m -5 -5
-        // l 5 5
-        // l -5 5`;
+        // m -4 -4
+        // l 4 4
+        // l -4 4`;
 
-        //from end to end
+        //from SS
         // this.path = `
         //     M ${start_x} ${start_y}
         //     a ${curve} ${curve} 0 0 0 -${curve}  ${curve}
         //     V ${offset}
         //     a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
         //     L ${end_x} ${end_y}
-        //     m -5 -5
-        //     l 5 5
-        //     l -5 5`;
+        //     m -4 -4
+        //     l 4 4
+        //     l -4 4`;
 
         // if (
         //     this.to_task.$bar.getX() <
@@ -85,7 +90,7 @@ export default class Arrow {
         //         curve_y;
         //     const left = this.to_task.$bar.getX() - this.gantt.options.padding;
 
-        // from start to end
+        // from F to S
         // this.path = `
         // M ${start_x} ${start_y}
         // a ${curve} ${curve} 0 0 1 ${curve} ${curve}
@@ -96,11 +101,11 @@ export default class Arrow {
         // V ${down_2}
         // a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
         // L ${end_x} ${end_y}
-        // m -5 -5
-        // l 5 5
-        // l -5 5`;
+        // m -4 -4
+        // l 4 4
+        // l -4 4`;
 
-        // from end to end 
+        // from S to S 
         // this.path = `
         //     M ${start_x} ${start_y}
         //     a ${curve} ${curve} 0 0 0 -${curve}  ${curve}
@@ -111,14 +116,14 @@ export default class Arrow {
         //     V ${down_2}
         //     a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
         //     L ${end_x} ${end_y}
-        //     m -5 -5
-        //     l 5 5
-        //     l -5 5`;
+        //     m -4 -4
+        //     l 4 4
+        //     l -4 4`;
 
 
         // }
 
-        // FROM START TO START
+        // FROM F TO F
 
         const down_1 = this.gantt.options.padding - curve;
         const down_2 =
@@ -126,20 +131,21 @@ export default class Arrow {
             this.to_task.$bar.getHeight() / 2 -
             curve_y;
         let right = this.to_task.$bar.getX() + this.to_task.$bar.getWidth() + this.gantt.options.padding / 2;
-
+        console.log(start_x);
         this.path = `
                     M ${start_x} ${start_y}
+                    h 5
                     a ${curve} ${curve} 0 0 1 ${curve} ${curve}
                     v ${down_1}
                     a ${curve} ${curve} 0 0 1 -${curve} ${curve}
-                    H ${right}
+                    H ${right + 5}
                     a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
                     V ${down_2}
                     a ${curve} ${curve} 0 0 1 -${curve} ${curve_y}
                     L ${end_x} ${end_y}
-                    // m -5 -5
-                    // l -5 5
-                    // l 5 5`;
+                    m 4 -4
+                    l -4 4
+                    l 4 4`;
 
         if (
             this.to_task.$bar.getX() + this.to_task.$bar.getWidth() >
@@ -147,19 +153,40 @@ export default class Arrow {
         ) {
             this.path = `
                     M ${start_x} ${start_y}
+                    h 5
                     a ${curve} ${curve} 0 0 1 ${curve} ${curve}
                     v ${down_1}
                     a ${curve} ${curve} 0 0 0 ${curve} ${curve}
-                    H ${right - 10}
+                    H ${right - 5}
                     a ${curve} ${curve} 0 0 1 ${curve} ${curve_y}
                     V ${down_2}
                     a ${curve} ${curve} 0 0 1 -${curve} ${curve_y}
                     L ${end_x} ${end_y}
-                    // m -5 -5
-                    // l -5 5
-                    // l 5 5`;
+                    m 4 -4
+                    l -4 4
+                    l 4 4`;
         }
 
+        if (
+            Math.abs((this.to_task.$bar.getX() + this.to_task.$bar.getWidth()) -
+                (this.from_task.$bar.getX() + this.from_task.$bar.getWidth())) < 9
+        ) {
+            right = start_x > end_x ? start_x + 5 : end_x + 5;
+            this.path = `
+                    M ${start_x} ${start_y}
+                    H ${right - 1}
+                    a ${curve} ${curve} 0 0 1 ${curve} ${curve}
+
+                    V ${end_y - 5}
+
+                    a ${curve} ${curve} 0 0 1 -${curve} ${curve_y}
+
+                    L ${end_x} ${end_y}
+                    m 4 -4
+                    l -4 4
+                    l 4 4`;
+        }
+    }
     draw() {
         this.element = createSVG('path', {
             d: this.path,

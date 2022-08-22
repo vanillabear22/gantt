@@ -42,7 +42,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappé Gantt only supports usage of a string CSS selector,' +
-                    " HTML DOM element or SVG DOM element for the 'element' parameter"
+                " HTML DOM element or SVG DOM element for the 'element' parameter"
             );
         }
 
@@ -143,6 +143,18 @@ export default class Gantt {
                         .filter((d) => d);
                 }
                 task.dependencies = deps;
+            }
+
+            // relationship_types
+            if (typeof task.relationship_types === 'string' || !task.relationship_types) {
+                let relationship_types = [];
+                if (task.relationship_types) {
+                    relationship_types = task.relationship_types
+                        .split(',')
+                        .map((d) => d.trim())
+                        .filter((d) => d);
+                }
+                task.relationship_types = relationship_types;
             }
 
             // uids
@@ -307,7 +319,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+            this.tasks.length;
 
         createSVG('rect', {
             x: 0,
@@ -427,7 +439,7 @@ export default class Gantt {
             const width = this.options.column_width;
             const height =
                 (this.options.bar_height + this.options.padding) *
-                    this.tasks.length +
+                this.tasks.length +
                 this.options.header_height +
                 this.options.padding / 2;
 
@@ -514,10 +526,10 @@ export default class Gantt {
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
                         ? date_utils.format(
-                              date,
-                              'D MMM',
-                              this.options.language
-                          )
+                            date,
+                            'D MMM',
+                            this.options.language
+                        )
                         : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
@@ -585,16 +597,19 @@ export default class Gantt {
                 .map((task_id) => {
                     const dependency = this.get_task(task_id);
                     if (!dependency) return;
+                    let task_index = task.dependencies.indexOf(task_id);
                     const arrow = new Arrow(
                         this,
                         this.bars[dependency._index], // from_task
-                        this.bars[task._index] // to_task
+                        this.bars[task._index], // to_task
+                        task.relationship_types[task_index]
                     );
                     this.layers.arrow.appendChild(arrow.element);
                     return arrow;
                 })
                 .filter(Boolean); // filter falsy values
             this.arrows = this.arrows.concat(arrows);
+            console.log(this.arrows);
         }
     }
 
@@ -631,7 +646,7 @@ export default class Gantt {
 
         const scroll_pos =
             (hours_before_first_task / this.options.step) *
-                this.options.column_width -
+            this.options.column_width -
             this.options.column_width;
 
         parent_element.scrollLeft = scroll_pos;
