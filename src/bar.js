@@ -46,6 +46,10 @@ export default class Bar {
             class: 'handle-group',
             append_to: this.group,
         });
+        this.relation_group = createSVG('g', {
+            class: 'relation-group',
+            append_to: this.group,
+        });
     }
 
     prepare_helpers() {
@@ -68,6 +72,7 @@ export default class Bar {
 
     draw() {
         this.draw_bar();
+        this.draw_relation_dots();
         this.draw_progress_bar();
         this.draw_label();
         this.draw_resize_handles();
@@ -157,6 +162,35 @@ export default class Bar {
         }
     }
 
+    draw_relation_dots() {
+        if (this.invalid) return;
+
+        const bar = this.$bar;
+        const dot_diameter = 8;
+
+        createSVG('rect', {
+            x: bar.getX() + bar.getWidth() + 4,
+            y: bar.getY() + bar.getHeight() / 2 - dot_diameter / 2,
+            width: dot_diameter,
+            height: dot_diameter,
+            rx: '50%',
+            ry: '50%',
+            class: 'dot finish',
+            append_to: this.relation_group,
+        });
+
+        createSVG('rect', {
+            x: bar.getX() - dot_diameter - 4,
+            y: bar.getY() + bar.getHeight() / 2 - dot_diameter / 2,
+            width: dot_diameter,
+            height: dot_diameter,
+            rx: '50%',
+            ry: '50%',
+            class: 'dot start',
+            append_to: this.relation_group,
+        });
+    }
+
     get_progress_polygon_points() {
         const bar_progress = this.$bar_progress;
         return [
@@ -241,6 +275,7 @@ export default class Bar {
         }
         this.update_label_position();
         this.update_handle_position();
+        this.update_dots_position();
         this.update_progressbar_position();
         this.update_arrow_position();
     }
@@ -399,6 +434,16 @@ export default class Bar {
         const handle = this.group.querySelector('.handle.progress');
         handle &&
             handle.setAttribute('points', this.get_progress_polygon_points());
+    }
+
+    update_dots_position() {
+        const bar = this.$bar;
+        this.relation_group
+            .querySelector('.dot.start')
+            .setAttribute('x', bar.getX() - 8 - 4); //8 - dot_radius
+        this.relation_group
+            .querySelector('.dot.finish')
+            .setAttribute('x', bar.getX() + bar.getWidth() + 4);
     }
 
     update_arrow_position() {

@@ -87,6 +87,13 @@ $handle-color: #ddd !default;
 		transition: opacity .3s ease;
 	}
 
+	.dot {
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity .7s ease-out, transform .7s ease-out;
+	}
+
+
 	.bar-wrapper {
 		cursor: pointer;
 		outline: none;
@@ -103,6 +110,11 @@ $handle-color: #ddd !default;
 			.handle {
 				visibility: visible;
 				opacity: 1;
+			}
+
+			.dot {
+				opacity: 1;
+				transform: translate(0);
 			}
 		}
 
