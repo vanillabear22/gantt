@@ -214,7 +214,6 @@ export default class Bar {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-
             this.show_popup();
             this.gantt.unselect_all();
             this.group.classList.add('active');
@@ -295,7 +294,6 @@ export default class Bar {
         }
 
         if (!changed) return;
-
         this.gantt.trigger_event('date_change', [
             this.task,
             new_start_date,

@@ -93,6 +93,10 @@ $handle-color: #ddd !default;
 		transition: opacity .7s ease-out, transform .7s ease-out;
 	}
 
+	.dot:hover {
+		fill: tomato;
+	}
+
 
 	.bar-wrapper {
 		cursor: pointer;

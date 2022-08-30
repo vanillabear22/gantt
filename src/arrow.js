@@ -55,7 +55,10 @@ export default class Arrow {
             ? end_y + this.gantt.options.arrow_curve
             : end_y - this.gantt.options.arrow_curve;
 
-        if (this.relationship_type === 'FS') {
+        if (
+            this.relationship_type === 'FS' ||
+            this.relationship_type === undefined
+        ) {
             this.path = `
                 M ${start_x} ${start_y}
                 h 5
