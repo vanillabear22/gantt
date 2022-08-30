@@ -657,45 +657,55 @@ export default class Gantt {
         let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bar
+        let new_relation = '';
         this.bar_being_dragged = null;
 
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
 
-        $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
-            const bar_wrapper = $.closest('.bar-wrapper', element);
+        $.on(
+            this.$svg,
+            'mousedown',
+            '.bar-wrapper, .handle, .dot',
+            (e, element) => {
+                const bar_wrapper = $.closest('.bar-wrapper', element);
 
-            if (element.classList.contains('left')) {
-                is_resizing_left = true;
-            } else if (element.classList.contains('right')) {
-                is_resizing_right = true;
-            } else if (element.classList.contains('bar-wrapper')) {
-                is_dragging = true;
+                if (element.classList.contains('left')) {
+                    is_resizing_left = true;
+                } else if (element.classList.contains('right')) {
+                    is_resizing_right = true;
+                } else if (element.classList.contains('bar-wrapper')) {
+                    is_dragging = true;
+                } else if (element.classList.contains('finish')) {
+                    new_relation += 'F';
+                } else if (element.classList.contains('start')) {
+                    new_relation += 'S';
+                }
+
+                bar_wrapper.classList.add('active');
+
+                x_on_start = e.offsetX;
+                y_on_start = e.offsetY;
+
+                parent_bar_id = bar_wrapper.getAttribute('data-id');
+                const ids = [
+                    parent_bar_id,
+                    ...this.get_all_dependent_tasks(parent_bar_id),
+                ];
+                bars = ids.map((id) => this.get_bar(id));
+
+                this.bar_being_dragged = parent_bar_id;
+
+                bars.forEach((bar) => {
+                    const $bar = bar.$bar;
+                    $bar.ox = $bar.getX();
+                    $bar.oy = $bar.getY();
+                    $bar.owidth = $bar.getWidth();
+                    $bar.finaldx = 0;
+                });
             }
-
-            bar_wrapper.classList.add('active');
-
-            x_on_start = e.offsetX;
-            y_on_start = e.offsetY;
-
-            parent_bar_id = bar_wrapper.getAttribute('data-id');
-            const ids = [
-                parent_bar_id,
-                ...this.get_all_dependent_tasks(parent_bar_id),
-            ];
-            bars = ids.map((id) => this.get_bar(id));
-
-            this.bar_being_dragged = parent_bar_id;
-
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.ox = $bar.getX();
-                $bar.oy = $bar.getY();
-                $bar.owidth = $bar.getWidth();
-                $bar.finaldx = 0;
-            });
-        });
+        );
 
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
@@ -747,6 +757,34 @@ export default class Gantt {
                 bar.date_changed();
                 bar.set_action_completed();
             });
+        });
+        // new depen
+        $.on(this.$svg, 'mouseup', '.dot', (e, element) => {
+            if (element.classList.contains('finish')) {
+                new_relation += 'F';
+            } else if (element.classList.contains('start')) {
+                new_relation += 'S';
+            }
+
+            const bar_wrapper = $.closest('.bar-wrapper', element);
+            let child_bar_id = bar_wrapper.getAttribute('data-id');
+            let child_bar = this.get_task(child_bar_id);
+            let parent_bar = this.get_task(parent_bar_id);
+            // проверка на то, что такая связь уже есть
+            if (child_bar.dependencies.indexOf(parent_bar.id) !== -1) {
+                console.log('такая связь уже есть');
+                return false;
+            }
+
+            if (['SS', 'FF', 'FS'].includes(new_relation)) {
+                gantt_chart.trigger_event('new_depndency', [
+                    this.get_task(parent_bar_id),
+                    this.get_task(child_bar_id),
+                    new_relation,
+                ]);
+                new_relation = '';
+                this.refresh(this.tasks);
+            }
         });
 
         this.bind_bar_progress();
