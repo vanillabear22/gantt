@@ -91,6 +91,9 @@ $handle-color: #ddd !default;
 		cursor: pointer;
 		opacity: 0;
 		transition: opacity .7s ease-out, transform .7s ease-out;
+		stroke: #ffffff;
+		stroke-width: 8px;
+		stroke-opacity: 0;
 	}
 
 	.dot:hover {
